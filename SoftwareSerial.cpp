@@ -123,7 +123,6 @@ SoftwareSerial::SoftwareSerial(int receivePin, int transmitPin, bool inverse_log
          m_inPos = m_outPos = 0;
          pinMode(m_rxPin, INPUT);
          ObjList[m_rxPin] = this;
-         enableRx(true);
       }
    }
    if (isValidGPIOpin(transmitPin)) {
@@ -257,6 +256,7 @@ int SoftwareSerial::peek() {
 }
 
 void IRAM_ATTR SoftwareSerial::rxRead() {
+   
    // Advance the starting point for the samples but compensate for the
    // initial delay which occurs before the interrupt is delivered
    unsigned long wait = m_bitTime + m_bitTime/3 - 500;
@@ -272,6 +272,7 @@ void IRAM_ATTR SoftwareSerial::rxRead() {
    // Stop bit
    WAIT;
    // Store the received value in the buffer unless we have an overflow
+   
    int next = (m_inPos+1) % m_buffSize;
    if (next != m_outPos) {
       m_buffer[m_inPos] = rec;
@@ -281,5 +282,6 @@ void IRAM_ATTR SoftwareSerial::rxRead() {
    }
    // Must clear this bit in the interrupt register,
    // it gets set even when interrupts are disabled
-   GPIO_REG_WRITE(GPIO.status_w1tc, 1 << m_rxPin);
+   GPIO.status_w1tc = (1 << m_rxPin);
+   
 }
